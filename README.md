@@ -148,6 +148,17 @@ int *p =  const_cast<int*>( &i );
 *p = 1234; //Undefined
 ```
 
+## Copying between overlapping memory regions
+
+Using memcpy to copy between overlapping memory regions. For example:
+
+```
+char a[256] = {};
+memcpy(a, a, sizeof(a));
+```
+
+The behavior is undefined according to the C Standard, which is subsumed by the C++03 Standard.
+
 # References
 
  * [Wikipedia](https://en.wikipedia.org/wiki/Undefined_behavior)
