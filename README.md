@@ -128,10 +128,31 @@ void f(int *p) {
 Why? Suppose p is not NULL. Then the first print will be fine, and the second print will get executed. Now suppose p is 
 NULL. Then the first print triggers UB, so everything thereafter is meaningless. For convenience we can make this behave the same as the first case, where both prints get executed.
 
+## Order of parameters
+
+Example:
+
+```
+some_func(foo(), bar());
+```
+
+It isn't guaranteed that foo() will be executed before bar() or the other way around.
+
+## Assigning to a constant
+
+Assigning to a constant after stripping constness using const_cast:
+
+```
+const int i = 10; 
+int *p =  const_cast<int*>( &i );
+*p = 1234; //Undefined
+```
+
 # References
 
  * [Wikipedia](https://en.wikipedia.org/wiki/Undefined_behavior)
  * [A Guide to Undefined Behavior in C and C++, Part 1](http://blog.regehr.org/archives/213) by John Regehr.
  * [Undefined behavior in C and C++ programs](https://www.nayuki.io/page/undefined-behavior-in-c-and-cplusplus-programs) from Project Nayuki.
+ * [What are all the common undefined behaviours that a C++ programmer should know about?](http://stackoverflow.com/questions/367633/what-are-all-the-common-undefined-behaviours-that-a-c-programmer-should-know-a) in Stack Overflow.
  
  
