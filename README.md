@@ -11,12 +11,32 @@ int x = 1;
 return x / 0; // undefined behavior
 ```
 
-## Accessing an array out of bounds
+## Out-of-bounds operations
+
+Simple example 1:
 
 ```
 int arr[4] = {0, 1, 2, 3};
 int *p = arr + 5;  // undefined behavior
 ```
+
+Computing an out-of-bounds pointer is UB, even without dereferencing it:
+
+```
+short a[10];
+short *p = &a[15];  // Bleep
+```
+
+## Unrelated objects
+
+Comparing pointers from unrelated objects is UB in C:
+
+```
+long *p = malloc(size(long));
+long *q = malloc(size(long));
+if (p > q) ...  // Ouch
+```
+
 ## Modifying an object between two sequence points
 
 Modifying an object between two sequence points more than once produces undefined behavior. It is worth mentioning that there are considerable changes in what causes undefined behavior in relation to sequence points as of C++11. The following example will however cause undefined behavior in both C++ and C.
@@ -32,7 +52,7 @@ a[i] = i++; // undefined behavior
 printf("%d %d\n", ++n, power(2, n)); // also undefined behavior
 ```
 
-## Integer overflows
+## Arithmetic overflows
 
 Simple example:
 ```
@@ -66,3 +86,52 @@ right (int64): -9223372036854775808
 ```
 
 In all modern C/C++ variants running on two’s complement machines, negating an int whose value is INT_MIN (or in this case, INT64_MIN) is undefined behavior. The fix is to add an explicit check for this case.
+
+## Uninitialized variables
+
+Reading an uninitialized local variable is usually UB:
+```
+int x;
+printf("%d", x);  // UB happens here
+```
+
+## Shifting more than the integer width or less than zero
+
+Shifting more than the integer width or less than zero is UB:
+```
+uint32_t x = 0;
+x = x << 33;  // Blamo
+x = x >> (-1);  // Kapow
+```
+
+## Null pointers
+
+Suppose we have a piece of code like this:
+
+```
+void f(int *p) {
+    printf("%d", *p);
+    if (p != NULL)
+        printf("OK");
+}
+```
+
+Then the compiler is permitted to substitute this equivalent code with the null check removed:
+
+```
+void f(int *p) {
+    printf("%d", *p);
+    printf("OK");
+}
+```
+
+Why? Suppose p is not NULL. Then the first print will be fine, and the second print will get executed. Now suppose p is 
+NULL. Then the first print triggers UB, so everything thereafter is meaningless. For convenience we can make this behave the same as the first case, where both prints get executed.
+
+# References
+
+ * [Wikipedia](https://en.wikipedia.org/wiki/Undefined_behavior)
+ * [A Guide to Undefined Behavior in C and C++, Part 1](http://blog.regehr.org/archives/213) by John Regehr.
+ * [Undefined behavior in C and C++ programs](https://www.nayuki.io/page/undefined-behavior-in-c-and-cplusplus-programs) from Project Nayuki.
+ 
+ 
